@@ -2,6 +2,22 @@
 
 require 'bundler/setup'
 require 'replay'
-require 'irb'
+require 'pry'
 
-IRB.start(__FILE__)
+module ReadingsTester
+  extend Replay::Scenario
+
+  on_start({ id: 1, age: 18 }) do |user|
+    set(:id, user[:id])
+    set(:age, user[:age])
+  end
+
+  on_action(:birthday, 1) do |years|
+    set(:age, get(:age) + years)
+  end
+end
+
+include ReadingsTester
+
+require 'pry'
+binding.pry
