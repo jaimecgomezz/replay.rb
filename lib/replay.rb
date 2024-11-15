@@ -72,7 +72,9 @@ module Replay
     end
 
     def sequence(name, defaults = nil, &blk)
-      raise(ArgumentError, "An enumerble must be provided to '#{name}' sequence: #{defaults}") unless defaults.is_a?(Enumerable)
+      unless defaults.nil? || defaults.is_a?(Enumerable)
+        raise(ArgumentError, "An enumerble must be provided to '#{name}' sequence: #{defaults}")
+      end
 
       self::REPLAY_SEQUENCES[name.to_sym] = { defaults: defaults, blk: blk }
     end

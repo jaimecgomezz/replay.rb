@@ -14,9 +14,12 @@ module Replay
           return
         end
 
-        defaults, blk = sequence.values_at(:defaults, :blk)
+        items ||= sequence[:defaults]
 
-        @__replay_sequence = Replay::Sequence.new(name.to_sym, items || defaults || [], blk)
+        raise(ArgumentError, "No items were provided to '#{name}' sequence start, nor has default items") if items.nil?
+        raise(ArgumentError, "An enumerble must be provided to '#{name}' sequence: #{items}") unless items.is_a?(Enumerable)
+
+        @__replay_sequence = Replay::Sequence.new(name.to_sym, items, sequence[:blk])
 
         @__replay_sequence.identifier
       end
