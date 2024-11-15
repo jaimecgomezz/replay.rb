@@ -1,7 +1,14 @@
+require_relative 'context/sequencer'
+require_relative 'context/requester'
+
 module Replay
   class Context
-    def initialize(state = {}, actions = {})
+    include Sequencer
+    include Requester
+
+    def initialize(state = {}, actions = {}, sequences = {})
       @__replay_state = state || {}
+      @__replay_sequences = sequences || {}
 
       # Run user-provided initialization mechanism
       initialization = actions.delete(:initialization)
@@ -24,16 +31,6 @@ module Replay
 
     def set(field, value)
       @__replay_state[field] = value
-    end
-
-    def request(method, uri, options = {})
-      raise(ArgumentError, "Invalid HTTP method: #{method}") unless HTTParty.respond_to?(method)
-
-      response = HTTParty.send(method, uri, options)
-
-      return response unless block_given?
-
-      yield(response)
     end
   end
 end

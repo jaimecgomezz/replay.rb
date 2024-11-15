@@ -1,5 +1,5 @@
 require_relative 'replay/version'
-require_relative 'replay/httparty'
+require_relative 'replay/sequence'
 require_relative 'replay/context'
 
 module Replay
@@ -9,6 +9,7 @@ module Replay
       typerr!(includer)
     when Module
       includer.const_set(:REPLAY_ACTIONS, { initialization: ->(*) {} }) unless includer.const_defined?(:REPLAY_ACTIONS)
+      includer.const_set(:REPLAY_SEQUENCES, {}) unless includer.const_defined?(:REPLAY_SEQUENCES)
       includer.const_set(:REPLAY_INCLUSIONS, []) unless includer.const_defined?(:REPLAY_INCLUSIONS)
       includer.const_set(:REPLAY_EXTENSIONS, []) unless includer.const_defined?(:REPLAY_EXTENSIONS)
       includer.extend(ReplayDefinitionMethods)
@@ -43,7 +44,7 @@ module Replay
   end
 
   def self.typerr!(klass)
-    raise(ArgumentError, "Can't make '#{klass.name}' a registry, expected a Module")
+    raise(ArgumentError, "Replay should only be included in modules: #{klass}")
   end
 
   module ReplayDefinitionMethods
@@ -52,7 +53,14 @@ module Replay
 
       self::REPLAY_ACTIONS[:initialization] = lambda do |argument = default|
         argument = default if argument.is_a?(Replay::Context)
-        argument.nil? ? instance_eval(&blk) : instance_exec(argument, &blk)
+
+        if argument.nil?
+          instance_eval(&blk)
+        else
+          raise(ArgumentError, "Hash must be provided to #on_start method: #{argument}") unless argument.is_a?(Hash)
+
+          instance_exec(argument, &blk)
+        end
       end
     end
 
@@ -61,6 +69,12 @@ module Replay
         argument = default if argument.is_a?(Replay::Context)
         argument.nil? ? instance_eval(&blk) : instance_exec(argument, &blk)
       end
+    end
+
+    def sequence(name, defaults = nil, &blk)
+      raise(ArgumentError, "An enumerble must be provided to '#{name}' sequence: #{defaults}") unless defaults.is_a?(Enumerable)
+
+      self::REPLAY_SEQUENCES[name.to_sym] = { defaults: defaults, blk: blk }
     end
 
     def start(state = nil)
@@ -86,7 +100,7 @@ module Replay
     end
 
     def __context_instance(state = nil)
-      @__context_instance ||= Replay::Context.new(state, self::REPLAY_ACTIONS).tap do |context|
+      @__context_instance ||= Replay::Context.new(state, self::REPLAY_ACTIONS, self::REPLAY_SEQUENCES).tap do |context|
         context.instance_exec(self::REPLAY_INCLUSIONS) do |subcontexts|
           subcontexts.each do |subcontext|
             singleton_class.include(subcontext)
