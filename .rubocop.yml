@@ -99,3 +99,7 @@ Metrics/BlockLength:
 # https://docs.rubocop.org/rubocop/cops_metrics.html#metricsmodulelength
 Metrics/ModuleLength:
   Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented

@@ -29,4 +29,7 @@ Gem::Specification.new do |spec|
   spec.bindir = 'exe'
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+
+  spec.add_dependency('httparty', '~> 0.22.0')
+  spec.add_dependency('pry', '~> 0.14.2')
 end
