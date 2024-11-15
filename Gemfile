@@ -3,7 +3,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'pry', '~> 0.14.2'
   gem 'rdbg', '~> 0.1.0'
   gem 'rspec', '~> 3.13'
   gem 'rubocop', '~> 1.66'
