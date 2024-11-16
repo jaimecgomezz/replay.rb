@@ -94,7 +94,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  pry (~> 0.14.2)
   rdbg (~> 0.1.0)
   replay!
   rspec (~> 3.13)
