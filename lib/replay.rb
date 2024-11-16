@@ -1,3 +1,5 @@
+require 'pry'
+
 require_relative 'replay/version'
 require_relative 'replay/sequence'
 require_relative 'replay/context'
@@ -52,27 +54,22 @@ module Replay
       raise(ArgumentError, "Hash must be provided to #on_start method: #{default}") unless default.is_a?(Hash)
 
       self::REPLAY_ACTIONS[:initialization] = lambda do |argument = default|
-        argument = default if argument.is_a?(Replay::Context)
+        argument = default if argument.nil? || argument.is_a?(Replay::Context)
+        raise(ArgumentError, "Hash must be provided to #on_start method: #{argument}") unless argument.is_a?(Hash)
 
-        if argument.nil?
-          instance_eval(&blk)
-        else
-          raise(ArgumentError, "Hash must be provided to #on_start method: #{argument}") unless argument.is_a?(Hash)
-
-          instance_exec(argument, &blk)
-        end
+        instance_exec(argument, &blk)
       end
     end
 
     def action(name, default = nil, &blk)
       self::REPLAY_ACTIONS[name.to_sym] = lambda do |argument = default|
-        argument = default if argument.is_a?(Replay::Context)
-        argument.nil? ? instance_eval(&blk) : instance_exec(argument, &blk)
+        argument = default if argument.nil? || argument.is_a?(Replay::Context)
+        instance_exec(argument, &blk)
       end
     end
 
     def sequence(name, defaults = nil, &blk)
-      unless defaults.nil? || defaults.is_a?(Enumerable)
+      if !defaults.nil? && !defaults.is_a?(Enumerable)
         raise(ArgumentError, "An enumerble must be provided to '#{name}' sequence: #{defaults}")
       end
 
