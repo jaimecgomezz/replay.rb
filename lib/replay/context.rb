@@ -15,8 +15,14 @@ module Replay
 
       # Dynamically define user-provided actions as instance methods
       actions.each do |action, blk|
-        define_singleton_method(action) do |argument = nil|
-          argument.nil? ? instance_eval(&blk) : instance_exec(argument, &blk)
+        define_singleton_method(action) do |argument = nil, &handler|
+          argument = nil if argument.is_a?(Replay::Context)
+
+          result = instance_exec(argument, &blk)
+
+          return result if handler.nil?
+
+          handler.call(result)
         rescue LocalJumpError => e
           e.exit_value
         end
