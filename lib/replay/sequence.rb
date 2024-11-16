@@ -18,11 +18,13 @@ module Replay
         return
       end
 
-      titems.map do |item|
+      results = titems.map do |item|
         context.instance_exec(item, &blk).tap do
           @index += 1
         end
       end
+
+      steps.size == 1 ? results.first : results
     end
 
     def backward(context, steps = 1)
@@ -34,11 +36,13 @@ module Replay
         return
       end
 
-      titems.reverse.map do |item|
+      results = titems.reverse.map do |item|
         context.instance_exec(item, &blk).tap do
           @index -= 1
         end
       end
+
+      steps.size == 1 ? results.first : results
     end
 
     def rewind

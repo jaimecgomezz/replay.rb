@@ -32,11 +32,7 @@ module Replay
 
         raise(ArgumentError, "Expected a postive amount of steps forward: #{steps}") unless steps.is_a?(Integer) && steps.positive?
 
-        results = @__replay_sequence.forward(self, steps)
-
-        return if results.nil?
-
-        steps == 1 ? results.first : results
+        @__replay_sequence.forward(self, steps)
       end
 
       def bw(steps = 1)
@@ -47,14 +43,10 @@ module Replay
 
         raise(ArgumentError, "Expected a postive amount of steps backwards: #{steps}") unless steps.is_a?(Integer) && steps.positive?
 
-        results = @__replay_sequence.backward(self, steps)
-
-        return if results.nil?
-
-        steps == 1 ? results.first : results
+        @__replay_sequence.backward(self, steps)
       end
 
-      def rewind
+      def rw
         if @__replay_sequence.nil?
           puts('WARN: No active sequence, ignoring')
           return
@@ -69,9 +61,9 @@ module Replay
           return
         end
 
-        identifier = @__replay_sequence.identifier
-        @__replay_sequence = nil
-        identifier
+        @__replay_sequence.identifier.tap do
+          @__replay_sequence = nil
+        end
       end
     end
   end
