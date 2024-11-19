@@ -97,16 +97,16 @@ module Replay
     def __define_sequence_method(scenario, name, info)
       defaults, blk = info.values_at(:defaults, :blk)
 
-      define_singleton_method(name) do |items = defaults|
+      if !defaults.nil? && !defaults.is_a?(Enumerable)
+        raise(ArgumentError, "Expected an Enumerable as '#{name}' default items, got: #{defaults}")
+      end
+
+      define_singleton_method(name) do
         sequence = instance_variable_get("@#{name}")
 
         return sequence unless sequence.nil?
 
-        items = defaults if items.nil?
-
-        raise(ArgumentError, "Expected an Iterable on '#{name}' sequence from #{scenario}, got: #{items}") unless items.is_a?(Iterable)
-
-        instance_variable_set("@#{name}", Replay::Sequence.new(self, name, items, blk))
+        instance_variable_set("@#{name}", Replay::Sequence.new(self, scenario, defaults, name, blk))
       end
     end
   end

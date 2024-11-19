@@ -1,53 +1,77 @@
 module Replay
   class Sequence
-    attr_reader :identifier, :items, :index, :blk
+    attr_reader :context, :scenario, :defaults, :identifier, :items, :index, :blk
 
-    def initialize(identifier, items, blk)
+    def initialize(context, scenario, defaults, identifier, blk)
+      @context = context
+      @scenario = scenario
+      @defaults = defaults
       @identifier = identifier
-      @items = items
-      @index = -1
+      @index = 0
       @blk = blk
     end
 
-    def forward(context, steps = 1)
-      tindex = index + 1
-      titems = items[tindex...(tindex + steps)]
+    def set(items = defaults)
+      raise(ArgumentError, "Expected an Enumerable as '#{identifier}' items, got: nil") if items.nil?
+      raise(ArgumentError, "Expected an Enumerable as '#{identifier}' items, got: #{items}") unless items.is_a?(Enumerable)
 
-      if titems.nil? || titems.empty?
-        puts("WARN: No steps remaining for '#{identifier}' sequence, move backward or rewing")
-        return
-      end
-
-      results = titems.map do |item|
-        context.instance_exec(item, &blk).tap do
-          @index += 1
-        end
-      end
-
-      steps.size == 1 ? results.first : results
+      @index = 0
+      @items = items
     end
 
-    def backward(context, steps = 1)
-      tindex = index - steps + 1
-      titems = items[tindex...(tindex + steps)]
+    def fw(steps = 1)
+      return if steps <= 0
 
-      if titems.nil? || titems.empty?
-        puts("WARN: No steps remaining for '#{identifier}' sequence, move forward")
-        return
-      end
+      @items ||= defaults
 
-      results = titems.reverse.map do |item|
-        context.instance_exec(item, &blk).tap do
-          @index -= 1
-        end
-      end
+      raise("No sequence of items found for '#{identifier}' sequece, run #set first") if items.nil?
 
-      steps.size == 1 ? results.first : results
+      results = steps.times.map { __fw }
+
+      steps == 1 ? results.first : results
     end
 
-    def rewind
+    def bw(steps = 1)
+      return if steps <= 0
+
+      @items ||= defaults
+
+      raise("No sequence of items found for '#{identifier}' sequece, run #set first") if items.nil?
+
+      results = steps.times.map { __bw }
+
+      steps == 1 ? results.first : results
+    end
+
+    def rw
+      @items ||= defaults
+
+      raise("No sequence of items found for '#{identifier}' sequece, run #set first") if items.nil?
+
       (@index + 1).tap do
         @index = -1
+      end
+    end
+
+    private
+
+    def __fw
+      return if index >= items.size
+
+      @index = [0, index].max
+
+      context.instance_exec(items[index], &blk).tap do
+        @index += 1
+      end
+    end
+
+    def __bw
+      return if index < 0
+
+      @index = [index, items.size - 1].min
+
+      context.instance_exec(items[index], &blk).tap do
+        @index -= 1
       end
     end
   end
