@@ -1,8 +1,8 @@
-require_relative 'lib/replay/version'
+require_relative 'lib/replay/scenario/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'replay'
-  spec.version = Replay::VERSION
+  spec.name = 'replay-scenario'
+  spec.version = Replay::Scenario::VERSION
   spec.authors = ['jaimecgomezz']
   spec.email = ['work@jaimecgomezwork.com']
 
@@ -10,8 +10,6 @@ Gem::Specification.new do |spec|
   spec.description = 'Replay interactive scenarios'
   spec.homepage = 'https://github.com/jaimecgomezz/replay.rb'
   spec.required_ruby_version = '>= 2.6.0'
-
-  spec.metadata['allowed_push_host'] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['changelog_uri'] = 'https://github.com/jaimecgomezz/replay.rb'

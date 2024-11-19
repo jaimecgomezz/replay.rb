@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    replay (0.1.0)
+    replay-scenario (1.0.0)
       httparty (~> 0.22.0)
       pry (~> 0.14.2)
 
@@ -95,7 +95,7 @@ PLATFORMS
 
 DEPENDENCIES
   rdbg (~> 0.1.0)
-  replay!
+  replay-scenario!
   rspec (~> 3.13)
   rubocop (~> 1.66)
   rubocop-performance (~> 1.22)
