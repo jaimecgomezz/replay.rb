@@ -53,7 +53,7 @@ module Replay
     def __define_configure_method(scenario, info)
       if info.nil?
         @__replay_configured = true
-        define_singleton_method(:configure) {}
+        define_singleton_method(:configure) { |*| }
         return
       end
 
@@ -62,8 +62,6 @@ module Replay
       _requireness, parameter = blk.parameters.first || []
 
       define_singleton_method(:configure) do |argument = default, &handler|
-        argument = default if argument.nil?
-
         raise(ArgumentError, "Expected '#{parameter}' on 'configure' action from #{scenario}, got: nil") if argument.nil? && !parameter.nil?
 
         @__replay_configured = true
@@ -84,9 +82,6 @@ module Replay
 
       define_singleton_method(name) do |argument = default, &handler|
         raise("#{scenario} hasn't been configured yet, call .configure") unless @__replay_configured
-
-        argument = default if argument.nil?
-
         raise(ArgumentError, "Expected '#{parameter}' on '#{name}' action from #{scenario}, got nil") if argument.nil? && !parameter.nil?
 
         result = instance_exec(argument, &blk)
